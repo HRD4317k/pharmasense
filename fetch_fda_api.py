@@ -104,37 +104,49 @@ def parse_report(item):
     }
 
 
-def fetch_data(api_key, max_records=20000, year=2023):
-    # Spread the quota evenly over the 12 months so the sample covers the whole year
-    per_month = math.ceil(max_records / 12)
-    records = []
-    print(f"Fetching up to {max_records} polypharmacy reports from {year} (~{per_month} per month).")
+def pick_days(year, month, k=None):
+    """Days of the month to sample: all of them, or k evenly spaced ones (for quick test runs)."""
+    last = calendar.monthrange(year, month)[1]
+    if not k or k >= last:
+        return list(range(1, last + 1))
+    return sorted({round(1 + i * (last - 1) / max(k - 1, 1)) for i in range(k)})
 
-    for month in range(1, 13):
-        last_day = calendar.monthrange(year, month)[1]
-        start, end = f"{year}{month:02d}01", f"{year}{month:02d}{last_day}"
-        month_records, skip = 0, 0
-        print(f"Month {year}-{month:02d}")
-        while month_records < per_month and skip < MAX_SKIP:
-            params = {"search": f"receivedate:[{start} TO {end}]", "limit": PAGE_SIZE, "skip": skip}
+
+def fetch_data(api_key, max_records=20000, year=2023, sample_days=None):
+    """Sample DAY BY DAY, not month by month.
+
+    openFDA returns a month's records in date order, so taking "the first N of each month" (what this function used to
+    do) returned only reports received on the 1st - the shipped sample had 15 distinct receive dates in a year, and
+    batch submissions made on those days looked like signals. One quota per day spreads the sample over the period."""
+    days = [(m, d) for m in range(1, 13) for d in pick_days(year, m, sample_days)]
+    per_day = max(1, math.ceil(max_records / len(days)))
+    records = []
+    print(f"Fetching up to {max_records} polypharmacy reports from {year}: {len(days)} days x ~{per_day} per day.")
+
+    for m, d in days:
+        day = f"{year}{m:02d}{d:02d}"
+        day_records, skip = 0, 0
+        while day_records < per_day and skip < MAX_SKIP:
+            params = {"search": f"receivedate:[{day} TO {day}]", "limit": PAGE_SIZE, "skip": skip}
             if api_key:
                 params["api_key"] = api_key
             status, data = get_page(params)
             if status == 404:        # openFDA's "no more matches"
                 break
             if status != 200 or not data:
-                print(f"  stopping this month (HTTP {status})")
+                print(f"  stopping {day} (HTTP {status})")
                 break
             for item in data.get("results", []):
                 rec = parse_report(item)
                 if rec:
                     records.append(rec)
-                    month_records += 1
-                    if month_records >= per_month:
+                    day_records += 1
+                    if day_records >= per_day:
                         break
             skip += PAGE_SIZE
-            print(f"  scanned {skip} raw reports, kept {month_records}")
             time.sleep(0.3)
+        if d == 1 or d % 10 == 0:
+            print(f"  {day}: kept {day_records} (total {len(records)})")
 
     if not records:
         print("No usable records fetched.")
@@ -149,7 +161,7 @@ def fetch_data(api_key, max_records=20000, year=2023):
     out.mkdir(exist_ok=True)
     df.to_parquet(out / "structured_fda_data.parquet", index=False)
     print(f"Saved {len(df)} reports to data/structured_fda_data.parquet "
-          f"({len(records) - len(df)} duplicate case versions removed)")
+          f"({len(records) - len(df)} duplicate case versions removed); {df['date'].nunique()} distinct receive dates")
     return df
 
 
@@ -158,6 +170,8 @@ if __name__ == "__main__":
     ap.add_argument("--api-key", default=os.environ.get("OPENFDA_API_KEY"), help="openFDA key (default: .env)")
     ap.add_argument("--max-records", type=int, default=20000, help="max polypharmacy reports to keep")
     ap.add_argument("--year", type=int, default=2023)
+    ap.add_argument("--sample-days", type=int, default=None,
+                    help="days sampled per month (evenly spaced); default all days. Use e.g. 5 for a quick test run")
     args = ap.parse_args()
 
     key = (args.api_key or "").strip()
@@ -168,5 +182,5 @@ if __name__ == "__main__":
     print(msg)
     if not ok:
         sys.exit(1)
-    if fetch_data(key, args.max_records, args.year) is None:
+    if fetch_data(key, args.max_records, args.year, args.sample_days) is None:
         sys.exit(1)

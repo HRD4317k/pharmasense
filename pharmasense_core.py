@@ -263,7 +263,13 @@ def evaluate_triplets(X, Y, drug_names, rx_names, triplets, min_events=3, log=pr
             log(f"  evaluated {t + 1}/{len(triplets)} triplets")
     if not blocks:
         return pd.DataFrame()
-    res = pd.concat(blocks, ignore_index=True)
+    return add_exact_tests(pd.concat(blocks, ignore_index=True), min_events)
+
+
+def add_exact_tests(res, min_events=3):
+    """One-sided exact test of the all-three group against the reference group, then Benjamini-Hochberg over every
+    row. Factored out of evaluate_triplets so a single combination counted from the whole openFDA database
+    (faers_live.py) goes through exactly the same test."""
     # Is the all-three group really above the reference group?  One-sided EXACT (Fisher / hypergeometric)
     # test, not a Wald test: Wald is badly anti-conservative at small counts.  Because only combinations
     # with >= min_events cases are tested, the p-value is conditioned on that filter (truncated null),
@@ -276,6 +282,8 @@ def evaluate_triplets(X, Y, drug_names, rx_names, triplets, min_events=3, log=pr
     res["p_ror"] = np.where(p_min > 0, np.minimum(p_obs / np.where(p_min > 0, p_min, 1), 1.0), 1.0)
     res["q_ror"] = multipletests(res["p_ror"].to_numpy(), method="fdr_bh")[1]
     return res
+
+
 
 
 def _triplet_block(names, rx, n_rx_total, n_k, EV):

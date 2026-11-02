@@ -1,0 +1,30 @@
+drug_a,drug_b,reaction,expected_type,expected_term,perpetrator,label,notes
+warfarin,fluconazole,INTERNATIONAL NORMALISED RATIO INCREASED,PK-enzyme,CYP2C9,fluconazole,1,Fluconazole inhibits CYP2C9 which clears S-warfarin
+warfarin,amiodarone,INTERNATIONAL NORMALISED RATIO INCREASED,PK-enzyme,CYP2C9,amiodarone,1,Amiodarone inhibits CYP2C9 (also CYP3A4/1A2)
+simvastatin,clarithromycin,RHABDOMYOLYSIS,PK-enzyme,CYP3A4,clarithromycin,1,Strong CYP3A4 inhibitor; simvastatin is a CYP3A4 substrate
+simvastatin,ketoconazole,RHABDOMYOLYSIS,PK-enzyme,CYP3A4,ketoconazole,1,Strong CYP3A4 inhibitor
+simvastatin,itraconazole,RHABDOMYOLYSIS,PK-enzyme,CYP3A4,itraconazole,1,Strong CYP3A4 inhibitor
+clopidogrel,omeprazole,,PK-enzyme,CYP2C19,omeprazole,1,Omeprazole inhibits CYP2C19 which activates clopidogrel
+tramadol,fluoxetine,,PK-enzyme,CYP2D6,fluoxetine,1,CYP2D6 inhibition lowers formation of the active O-desmethyltramadol
+tramadol,paroxetine,,PK-enzyme,CYP2D6,paroxetine,1,Strong CYP2D6 inhibitor
+theophylline,ciprofloxacin,,PK-enzyme,CYP1A2,ciprofloxacin,1,Ciprofloxacin inhibits CYP1A2 which clears theophylline
+digoxin,clarithromycin,,PK-transporter,P-gp,clarithromycin,1,P-gp inhibition raises digoxin exposure
+azathioprine,allopurinol,MYELOSUPPRESSION,PK-enzyme,XO,allopurinol,1,Allopurinol inhibits xanthine oxidase which inactivates azathioprine's metabolite
+sildenafil,nitroglycerin,HYPOTENSION,PD-effect-axis,Hypotension,,1,Additive vasodilation
+fluconazole,amiodarone,,PD-effect-axis,QT prolongation,,1,Both labels warn of QT prolongation
+citalopram,ondansetron,,PD-effect-axis,QT prolongation,,1,Both labels warn of QT prolongation
+sertraline,tramadol,,PD-effect-axis,Serotonin toxicity,,1,Both labels warn of serotonin syndrome
+fluoxetine,linezolid,,PD-effect-axis,Serotonin toxicity,,1,Both labels warn of serotonin syndrome
+lisinopril,spironolactone,HYPERKALAEMIA,PD-effect-axis,Hyperkalaemia,,1,Both labels warn of hyperkalaemia
+oxycodone,alprazolam,,PD-effect-axis,CNS / respiratory depression,,1,Boxed warning for opioid + benzodiazepine
+methotrexate,trimethoprim,,PD-effect-axis,Myelosuppression,,1,Additive antifolate marrow suppression
+warfarin,ibuprofen,HAEMORRHAGE,PD-effect-axis,Bleeding,,1,NSAID + anticoagulant bleeding
+pravastatin,ketoconazole,,PK-enzyme,CYP3A4,ketoconazole,0,Pravastatin is not meaningfully CYP3A4 metabolised
+rosuvastatin,ketoconazole,,PK-enzyme,CYP3A4,ketoconazole,0,Rosuvastatin is minimally CYP-metabolised
+lisinopril,ketoconazole,,PK-enzyme,CYP3A4,ketoconazole,0,Lisinopril is not metabolised
+atenolol,fluoxetine,,PK-enzyme,CYP2D6,fluoxetine,0,Atenolol is renally cleared unchanged
+desvenlafaxine,paroxetine,,PK-enzyme,CYP2D6,paroxetine,0,Desvenlafaxine is cleared mainly by conjugation
+pantoprazole,clopidogrel,,PK-enzyme,CYP2C19,pantoprazole,0,Pantoprazole is a weak CYP2C19 inhibitor; label advice targets omeprazole/esomeprazole (arguable negative)
+metformin,warfarin,,PK-enzyme,CYP2C9,metformin,0,Metformin is not metabolised
+metformin,amlodipine,,PD-effect-axis,QT prolongation,,0,Neither label warns of QT prolongation
+atorvastatin,levothyroxine,,PD-effect-axis,Serotonin toxicity,,0,Neither label warns of serotonin syndrome

@@ -17,6 +17,11 @@ import streamlit as st
 import exclusions
 import pharmasense_core as core
 
+try:                                   # optional mechanism-engine pages (need langgraph / rdkit / networkx)
+    import app_ai
+except Exception as _e:                # noqa: BLE001 - the original app must keep working without them
+    app_ai, _AI_ERR = None, _e
+
 ROOT = Path(__file__).resolve().parent
 RES = ROOT / "data" / "results"
 INK, TEAL, RISK, MUTE, AMBER = "#12303A", "#0E7C86", "#C2185B", "#6B8791", "#E0A030"
@@ -379,7 +384,12 @@ def page_combos(D, T, M, X, meta):
 def page_glossary(D, T, M, X, meta):
     st.title("Glossary & formulas")
     st.caption("You do not need any of this to use the app. It is here for anyone who wants to check how a number is made.")
-    t1, t2, t3, t4, t5 = st.tabs(["Key definitions", "Formulas", "How the verdict is decided", "What is excluded", "Limitations"])
+    t1, t2, t3, t4, t5, t6 = st.tabs(["Key definitions", "Formulas", "How the verdict is decided", "What is excluded", "Limitations", "Mechanism engine"])
+    with t6:
+        if app_ai is not None:
+            app_ai.glossary_tab()
+        else:
+            st.info("The mechanism engine is not installed. `pip install -r requirements.txt`")
     with t1:
         defs = {
             "FAERS / openFDA": "The FDA Adverse Event Reporting System: voluntary reports from patients, doctors and manufacturers. openFDA serves it through a public API.",
@@ -514,13 +524,16 @@ def page_ml():
 # ---------------------------------------------------------------- main
 st.sidebar.markdown("## 💊 PharmaSense")
 st.sidebar.caption("Drug and drug-combination safety signals from FDA adverse-event reports")
-page = st.sidebar.radio("Page", ["Overview", "Drug search", "Combination signals", "Glossary & formulas", "ML models"],
+AI_PAGES = list(app_ai.PAGES) if app_ai is not None else []
+page = st.sidebar.radio("Page", ["Overview", "Drug search", "Combination signals", "Glossary & formulas", "ML models"] + AI_PAGES,
                         label_visibility="collapsed")
 st.sidebar.caption("New to these terms? Open **Glossary & formulas**.")
 st.sidebar.caption("Research signals only. Association is not causation; not medical advice.")
 
 meta_file = RES / "meta.json"
-if page == "ML models":
+if page in AI_PAGES:
+    app_ai.PAGES[page]()
+elif page == "ML models":
     page_ml()
 elif not meta_file.exists():
     st.title("No results yet")

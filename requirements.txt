@@ -12,3 +12,9 @@ pyarrow>=14
 python-dotenv>=1.0
 requests>=2.31
 tqdm>=4.66
+
+# --- mechanism engine (pharmasense_ai/) ---
+langgraph>=0.2          # the Explain/Challenge agent graph
+rdkit>=2023.9           # structures, fingerprints, similarity
+networkx>=3.0           # knowledge graph + link prediction
+pytest>=7.4             # tests (python -m pytest tests -q)

@@ -1,0 +1,17 @@
+drug,enzyme,role
+warfarin,CYP2C9,substrate
+fluconazole,CYP2C9,inhibitor
+fluconazole,CYP3A4,inhibitor
+fluconazole,CYP2C19,inhibitor
+ketoconazole,CYP3A4,inhibitor
+simvastatin,CYP3A4,substrate
+clarithromycin,CYP3A4,inhibitor
+omeprazole,CYP2C19,substrate
+omeprazole,CYP2C19,inhibitor
+clopidogrel,CYP2C19,substrate
+fluoxetine,CYP2D6,inhibitor
+paroxetine,CYP2D6,inhibitor
+theophylline,CYP1A2,substrate
+ciprofloxacin,CYP1A2,inhibitor
+tramadol,CYP2D6,substrate
+digoxin,P-gp,substrate
