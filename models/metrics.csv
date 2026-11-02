@@ -1,0 +1,4 @@
+model,auc,auprc,f1
+Lasso,0.9703,0.9684,0.8889
+Random Forest,0.9884,0.972,0.9032
+XGBoost,0.9688,0.9682,0.8889

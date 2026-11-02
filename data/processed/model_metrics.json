@@ -1,0 +1,29 @@
+{
+    "Target": "ILL-DEFINED DISORDER",
+    "Models": {
+        "Lasso": {
+            "Accuracy": 0.9826,
+            "Precision": 0.8235,
+            "Recall": 0.9655,
+            "F1 Score": 0.8889,
+            "ROC AUC": 0.9703,
+            "AUPRC": 0.9684
+        },
+        "Random Forest": {
+            "Accuracy": 0.9851,
+            "Precision": 0.8485,
+            "Recall": 0.9655,
+            "F1 Score": 0.9032,
+            "ROC AUC": 0.9884,
+            "AUPRC": 0.972
+        },
+        "XGBoost": {
+            "Accuracy": 0.9826,
+            "Precision": 0.8235,
+            "Recall": 0.9655,
+            "F1 Score": 0.8889,
+            "ROC AUC": 0.9688,
+            "AUPRC": 0.9682
+        }
+    }
+}
