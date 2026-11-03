@@ -1,0 +1,395 @@
+{
+ "summary": {
+  "n_positive": 20,
+  "n_negative": 9,
+  "recall": {
+   "value": 0.65,
+   "ci95": [
+    0.43223390615850393,
+    0.827723786368088
+   ],
+   "k": 13
+  },
+  "proposed_rate_positives": 0.9,
+  "false_positive_rate": {
+   "value": 0.0,
+   "ci95": [
+    5.3064053418492834e-05,
+    0.23761009863290306
+   ],
+   "k": 0
+  },
+  "missed": [
+   {
+    "drug_a": "simvastatin",
+    "drug_b": "itraconazole",
+    "expected": "PK-enzyme:CYP3A4",
+    "verdict": "contested"
+   },
+   {
+    "drug_a": "tramadol",
+    "drug_b": "paroxetine",
+    "expected": "PK-enzyme:CYP2D6",
+    "verdict": "not proposed"
+   },
+   {
+    "drug_a": "theophylline",
+    "drug_b": "ciprofloxacin",
+    "expected": "PK-enzyme:CYP1A2",
+    "verdict": "not proposed"
+   },
+   {
+    "drug_a": "digoxin",
+    "drug_b": "clarithromycin",
+    "expected": "PK-transporter:P-gp",
+    "verdict": "contested"
+   },
+   {
+    "drug_a": "citalopram",
+    "drug_b": "ondansetron",
+    "expected": "PD-effect-axis:QT prolongation",
+    "verdict": "untested"
+   },
+   {
+    "drug_a": "sertraline",
+    "drug_b": "tramadol",
+    "expected": "PD-effect-axis:Serotonin toxicity",
+    "verdict": "untested"
+   },
+   {
+    "drug_a": "lisinopril",
+    "drug_b": "spironolactone",
+    "expected": "PD-effect-axis:Hyperkalaemia",
+    "verdict": "untested"
+   }
+  ],
+  "false_alarms": [],
+  "auroc": 0.95,
+  "auroc_ci95": [
+   0.8748641304347826,
+   1.0
+  ],
+  "brier": 0.1137206896551724
+ },
+ "rows": [
+  {
+   "drug_a": "warfarin",
+   "drug_b": "fluconazole",
+   "expected": "PK-enzyme:CYP2C9",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.907,
+   "supported": true,
+   "n_other_supported": 2
+  },
+  {
+   "drug_a": "warfarin",
+   "drug_b": "amiodarone",
+   "expected": "PK-enzyme:CYP2C9",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.888,
+   "supported": true,
+   "n_other_supported": 1
+  },
+  {
+   "drug_a": "simvastatin",
+   "drug_b": "clarithromycin",
+   "expected": "PK-enzyme:CYP3A4",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.951,
+   "supported": true,
+   "n_other_supported": 5
+  },
+  {
+   "drug_a": "simvastatin",
+   "drug_b": "ketoconazole",
+   "expected": "PK-enzyme:CYP3A4",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.946,
+   "supported": true,
+   "n_other_supported": 4
+  },
+  {
+   "drug_a": "simvastatin",
+   "drug_b": "itraconazole",
+   "expected": "PK-enzyme:CYP3A4",
+   "label": 1,
+   "proposed": true,
+   "verdict": "contested",
+   "posterior": 0.945,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "clopidogrel",
+   "drug_b": "omeprazole",
+   "expected": "PK-enzyme:CYP2C19",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.984,
+   "supported": true,
+   "n_other_supported": 1
+  },
+  {
+   "drug_a": "tramadol",
+   "drug_b": "fluoxetine",
+   "expected": "PK-enzyme:CYP2D6",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.888,
+   "supported": true,
+   "n_other_supported": 5
+  },
+  {
+   "drug_a": "tramadol",
+   "drug_b": "paroxetine",
+   "expected": "PK-enzyme:CYP2D6",
+   "label": 1,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 2
+  },
+  {
+   "drug_a": "theophylline",
+   "drug_b": "ciprofloxacin",
+   "expected": "PK-enzyme:CYP1A2",
+   "label": 1,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 1
+  },
+  {
+   "drug_a": "digoxin",
+   "drug_b": "clarithromycin",
+   "expected": "PK-transporter:P-gp",
+   "label": 1,
+   "proposed": true,
+   "verdict": "contested",
+   "posterior": 0.658,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "azathioprine",
+   "drug_b": "allopurinol",
+   "expected": "PK-enzyme:XO",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.951,
+   "supported": true,
+   "n_other_supported": 2
+  },
+  {
+   "drug_a": "sildenafil",
+   "drug_b": "nitroglycerin",
+   "expected": "PD-effect-axis:Hypotension",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.672,
+   "supported": true,
+   "n_other_supported": 3
+  },
+  {
+   "drug_a": "fluconazole",
+   "drug_b": "amiodarone",
+   "expected": "PD-effect-axis:QT prolongation",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.945,
+   "supported": true,
+   "n_other_supported": 3
+  },
+  {
+   "drug_a": "citalopram",
+   "drug_b": "ondansetron",
+   "expected": "PD-effect-axis:QT prolongation",
+   "label": 1,
+   "proposed": true,
+   "verdict": "untested",
+   "posterior": 0.391,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "sertraline",
+   "drug_b": "tramadol",
+   "expected": "PD-effect-axis:Serotonin toxicity",
+   "label": 1,
+   "proposed": true,
+   "verdict": "untested",
+   "posterior": 0.542,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "fluoxetine",
+   "drug_b": "linezolid",
+   "expected": "PD-effect-axis:Serotonin toxicity",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.869,
+   "supported": true,
+   "n_other_supported": 2
+  },
+  {
+   "drug_a": "lisinopril",
+   "drug_b": "spironolactone",
+   "expected": "PD-effect-axis:Hyperkalaemia",
+   "label": 1,
+   "proposed": true,
+   "verdict": "untested",
+   "posterior": 0.542,
+   "supported": false,
+   "n_other_supported": 1
+  },
+  {
+   "drug_a": "oxycodone",
+   "drug_b": "alprazolam",
+   "expected": "PD-effect-axis:CNS / respiratory depression",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.672,
+   "supported": true,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "methotrexate",
+   "drug_b": "trimethoprim",
+   "expected": "PD-effect-axis:Myelosuppression",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.679,
+   "supported": true,
+   "n_other_supported": 3
+  },
+  {
+   "drug_a": "warfarin",
+   "drug_b": "ibuprofen",
+   "expected": "PD-effect-axis:Bleeding",
+   "label": 1,
+   "proposed": true,
+   "verdict": "supported",
+   "posterior": 0.914,
+   "supported": true,
+   "n_other_supported": 1
+  },
+  {
+   "drug_a": "pravastatin",
+   "drug_b": "ketoconazole",
+   "expected": "PK-enzyme:CYP3A4",
+   "label": 0,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "rosuvastatin",
+   "drug_b": "ketoconazole",
+   "expected": "PK-enzyme:CYP3A4",
+   "label": 0,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "lisinopril",
+   "drug_b": "ketoconazole",
+   "expected": "PK-enzyme:CYP3A4",
+   "label": 0,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "atenolol",
+   "drug_b": "fluoxetine",
+   "expected": "PK-enzyme:CYP2D6",
+   "label": 0,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "desvenlafaxine",
+   "drug_b": "paroxetine",
+   "expected": "PK-enzyme:CYP2D6",
+   "label": 0,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 1
+  },
+  {
+   "drug_a": "pantoprazole",
+   "drug_b": "clopidogrel",
+   "expected": "PK-enzyme:CYP2C19",
+   "label": 0,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "metformin",
+   "drug_b": "warfarin",
+   "expected": "PK-enzyme:CYP2C9",
+   "label": 0,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "metformin",
+   "drug_b": "amlodipine",
+   "expected": "PD-effect-axis:QT prolongation",
+   "label": 0,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 0
+  },
+  {
+   "drug_a": "atorvastatin",
+   "drug_b": "levothyroxine",
+   "expected": "PD-effect-axis:Serotonin toxicity",
+   "label": 0,
+   "proposed": false,
+   "verdict": "not proposed",
+   "posterior": 0.0,
+   "supported": false,
+   "n_other_supported": 0
+  }
+ ]
+}

@@ -39,8 +39,17 @@ class ChEMBL:
 
     def mechanisms(self, chembl_id: str) -> list[dict]:
         data = self.http.get_json(f"{BASE}/mechanism.json", {"molecule_chembl_id": chembl_id, "limit": 100})
+        mechs = (data or {}).get("mechanisms") or []
+        if not mechs:
+            data = self.http.get_json(f"{BASE}/mechanism.json", {"parent_molecule_chembl_id": chembl_id, "limit": 100})
+            mechs = (data or {}).get("mechanisms") or []
         out = []
-        for m in (data or {}).get("mechanisms") or []:
+        seen = set()
+        for m in mechs:
+            key = (m.get("mechanism_of_action"), m.get("target_chembl_id"))
+            if key in seen:
+                continue
+            seen.add(key)
             out.append({"mechanism": m.get("mechanism_of_action"), "action_type": m.get("action_type"),
                         "target_chembl_id": m.get("target_chembl_id"), "refs": m.get("mechanism_refs") or []})
         return out
@@ -55,8 +64,12 @@ class ChEMBL:
 
     def indications(self, chembl_id: str) -> list[dict]:
         data = self.http.get_json(f"{BASE}/drug_indication.json", {"molecule_chembl_id": chembl_id, "limit": 100})
+        inds = (data or {}).get("drug_indications") or []
+        if not inds:
+            data = self.http.get_json(f"{BASE}/drug_indication.json", {"parent_molecule_chembl_id": chembl_id, "limit": 100})
+            inds = (data or {}).get("drug_indications") or []
         seen, out = set(), []
-        for d in (data or {}).get("drug_indications") or []:
+        for d in inds:
             term = d.get("mesh_heading") or d.get("efo_term")
             if term and term not in seen:
                 seen.add(term)

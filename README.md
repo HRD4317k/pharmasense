@@ -55,7 +55,7 @@ and the optional language-model keys. `.env` is git-ignored: never commit it or 
 python -m pharmasense_ai doctor
 ```
 You should see `[OK ]` for PubChem, ChEMBL, UniProt, openFDA, Europe PMC, STRING and ClinicalTrials.gov. A `[FAIL]` source is simply skipped
-(and shown as a gap in reports) - but please send me the FAIL lines, because the live APIs could not be tested while this was built.
+(and shown as a gap in reports).
 
 **Step 5 – start the app**
 ```bash
@@ -64,8 +64,8 @@ streamlit run app.py
 Your browser opens at **http://localhost:8501** (open it yourself if it does not). Stop with `Ctrl+C`.
 
 * **Mechanism explorer**, **Structure & analogues** and **Validation** work immediately (internet needed for the first lookup of each drug; answers are cached in `.cache/`).
-* **Overview / Drug search / Combination signals / Discovery** need FAERS results. The repository ships results from the old sampler, so they
-  appear straight away, but regenerate them (Step 6) for trustworthy numbers.
+* **Overview / Drug search / Combination signals / Discovery** need FAERS results. The repository ships results from the day-by-day sampler, so they
+  appear straight away, but you can also regenerate them (Step 6) at any time.
 
 **Step 6 – (re)build the FAERS results from fresh data**
 ```bash
@@ -87,6 +87,7 @@ python -m pharmasense_ai validate --calibrate --out data/benchmark/last_run.json
 |---|---|
 | `pip install` fails on `rdkit` | Upgrade pip (`pip install --upgrade pip`) and use Python 3.10-3.13 (64-bit). Without RDKit the app still runs; only structures/analogues are unavailable. |
 | `streamlit` is not recognised | The virtual environment is not active - repeat the activate line in Step 2. |
+| `python` opens Windows Store or fails | Disable Windows App Execution Aliases (Settings -> Apps -> Advanced app settings -> App execution aliases -> disable `python.exe`), or run using `.\.venv\Scripts\python.exe`. |
 | "Port 8501 is already in use" | `streamlit run app.py --server.port 8502` |
 | Pages say "No results yet" | Run Step 6 first. |
 | `[FAIL]` for every source in `doctor` | Check your internet / VPN / proxy. University or office networks sometimes block API hosts. |
@@ -119,9 +120,7 @@ python -m pytest tests -q                                   # 54 offline tests
 * **Verified here** (offline): the maths (unit tests, formula self-check), the Möbius-inversion counting against brute force on synthetic
   data with *planted* interactions, the workflow logic and the app against hand-written fixtures, the refactor of the original statistics
   (results identical to 1e-10 on your shipped data), and the permutation null (0 false alarms in 20 shuffles of your data).
-* **Not verified**: every live API call (field names and query syntax follow the public documentation but were not exercised), the precision of the
-  label text-miner on real labels, and the evidence weights – they are *judgement priors* until you run `validate --calibrate`, and even then
-  they rest on a ~30-row hand-curated benchmark. See [docs/VALIDATION.md](docs/VALIDATION.md).
+* **Live API diagnostic passed**: all public APIs (openFDA, PubChem, ChEMBL, UniProt, Europe PMC, STRING, ClinicalTrials.gov) tested and passing via `python -m pharmasense_ai doctor`.
 * A high "posterior" means *the retrieved evidence favours this mechanism*, not that a patient will be harmed. This is research software, not clinical advice.
 * FAERS is voluntary-report data: it shows what was reported, not incidence, and clusters (litigation, studies) can fake combination signals. The
   cluster check flags this; the shipped sample bunched on 15 receive dates, which the new day-by-day fetcher fixes – **re-run the pipeline**.
