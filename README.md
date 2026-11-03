@@ -22,29 +22,79 @@ It also shows **molecular structure, structurally similar drugs, what is observe
 > I make no claim that knowledge graphs, hypergraphs or AI-assisted drug discovery are new. The contribution is combining them with
 > **disclosed statistics and cited evidence** so that every output can be audited. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## 1. Setup
+## 1. Run it on your own laptop (step by step)
+
+Works on Windows, macOS and Linux. You need **Python 3.10 or newer** (check with `python --version`; on macOS/Linux you may need `python3`),
+**git**, and an internet connection (the mechanism engine calls free public APIs). Everything runs on `localhost`; nothing is deployed.
+
+**Step 1 – get the code**
+```bash
+git clone https://github.com/HRD4317k/pharmasense.git
+cd pharmasense
+```
+
+**Step 2 – create an isolated environment and install**
 ```bash
 python -m venv .venv
-# Windows:   .venv\Scripts\activate        macOS/Linux:  source .venv/bin/activate
+# Windows (PowerShell):   .venv\Scripts\Activate.ps1        Windows (cmd):  .venv\Scripts\activate.bat
+# macOS / Linux:          source .venv/bin/activate
+pip install --upgrade pip
 pip install -r requirements.txt
-cp .env.example .env        # Windows: copy .env.example .env
 ```
-Open `.env`. **All keys are free; none is mandatory** – `.env.example` says where to get each one (openFDA key, optional Groq / Gemini /
-OpenRouter / local Ollama for a language model). Then check what works on your machine:
+(The first install takes a few minutes: it includes RDKit, LangGraph and XGBoost.)
+
+**Step 3 – add your keys (all free, none strictly required)**
+```bash
+# Windows:  copy .env.example .env          macOS / Linux:  cp .env.example .env
+```
+Open `.env` in any editor. Paste your openFDA key after `OPENFDA_API_KEY=` (no quotes or spaces). `.env.example` explains where to get it
+and the optional language-model keys. `.env` is git-ignored: never commit it or share it in a zip.
+
+**Step 4 – check that every data source works from your machine**
 ```bash
 python -m pharmasense_ai doctor
 ```
-The live behaviour of the web APIs could not be tested while this code was written (no network in the build environment), so `doctor` is
-the first thing to run. A source that fails is skipped and shown as a *gap* in reports; it is never treated as evidence against a mechanism.
+You should see `[OK ]` for PubChem, ChEMBL, UniProt, openFDA, Europe PMC, STRING and ClinicalTrials.gov. A `[FAIL]` source is simply skipped
+(and shown as a gap in reports) - but please send me the FAIL lines, because the live APIs could not be tested while this was built.
 
-## 2. Run
+**Step 5 – start the app**
 ```bash
-python run_pipeline.py --max-records 3000     # quick test of the signal layer (day-by-day sampling across the year)
+streamlit run app.py
+```
+Your browser opens at **http://localhost:8501** (open it yourself if it does not). Stop with `Ctrl+C`.
+
+* **Mechanism explorer**, **Structure & analogues** and **Validation** work immediately (internet needed for the first lookup of each drug; answers are cached in `.cache/`).
+* **Overview / Drug search / Combination signals / Discovery** need FAERS results. The repository ships results from the old sampler, so they
+  appear straight away, but regenerate them (Step 6) for trustworthy numbers.
+
+**Step 6 – (re)build the FAERS results from fresh data**
+```bash
+python run_pipeline.py --max-records 3000     # quick test, a few minutes
 python run_pipeline.py                        # 20,000 reports
-streamlit run app.py                          # http://localhost:8501
+python run_pipeline.py --skip-fetch --calibrate   # re-mine existing download + permutation-null false-alarm check
+python run_pipeline.py --skip-fetch --full        # also the DuckDB analysis and ML models ("ML models" page)
+```
+Refresh the browser tab afterwards.
+
+**Step 7 – (optional) run the checks**
+```bash
+python -m pytest tests -q                                  # 54 offline tests, ~10 s
+python -m pharmasense_ai validate --calibrate --out data/benchmark/last_run.json   # fills the Validation page
 ```
 
-### Mechanism engine from the command line
+### Troubleshooting
+| Symptom | Fix |
+|---|---|
+| `pip install` fails on `rdkit` | Upgrade pip (`pip install --upgrade pip`) and use Python 3.10-3.13 (64-bit). Without RDKit the app still runs; only structures/analogues are unavailable. |
+| `streamlit` is not recognised | The virtual environment is not active - repeat the activate line in Step 2. |
+| "Port 8501 is already in use" | `streamlit run app.py --server.port 8502` |
+| Pages say "No results yet" | Run Step 6 first. |
+| `[FAIL]` for every source in `doctor` | Check your internet / VPN / proxy. University or office networks sometimes block API hosts. |
+| openFDA errors or HTTP 429 | Add your openFDA key (Step 3); without one you only get 1,000 requests/day. Wait a minute and retry. |
+| DuckDB "could not set lock" | Another script is using `data/processed/faers.db`; close it first. |
+| Old data keeps appearing | Delete the `.cache/` folder to force fresh API answers. |
+
+## 2. Mechanism engine from the command line
 ```bash
 python -m pharmasense_ai explain warfarin fluconazole --reaction "INTERNATIONAL NORMALISED RATIO INCREASED" --live-faers
 python -m pharmasense_ai live-faers warfarin fluconazole simvastatin --reaction RHABDOMYOLYSIS   # whole-database counts + verdict
