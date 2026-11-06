@@ -1,63 +1,63 @@
 {
     "Target": "FATIGUE",
-    "n_reports": 2008,
-    "n_positive": 129,
-    "prevalence": 0.0642,
-    "n_receive_dates": 15,
+    "n_reports": 12935,
+    "n_positive": 804,
+    "prevalence": 0.0622,
+    "n_receive_dates": 365,
     "folds": 5,
     "Models": {
         "Lasso": {
             "random": {
-                "Accuracy": 0.758,
-                "Precision": 0.1178,
-                "Recall": 0.4264,
-                "F1 Score": 0.1846,
-                "ROC AUC": 0.6248,
-                "AUPRC": 0.1028
+                "Accuracy": 0.7109,
+                "Precision": 0.1071,
+                "Recall": 0.4975,
+                "F1 Score": 0.1763,
+                "ROC AUC": 0.6436,
+                "AUPRC": 0.1263
             },
             "batch_aware": {
-                "Accuracy": 0.7525,
-                "Precision": 0.1214,
-                "Recall": 0.4574,
-                "F1 Score": 0.1919,
-                "ROC AUC": 0.6121,
-                "AUPRC": 0.0932
+                "Accuracy": 0.7086,
+                "Precision": 0.1048,
+                "Recall": 0.4888,
+                "F1 Score": 0.1726,
+                "ROC AUC": 0.6443,
+                "AUPRC": 0.124
             }
         },
         "Random Forest": {
             "random": {
-                "Accuracy": 0.74,
-                "Precision": 0.0719,
-                "Recall": 0.2558,
-                "F1 Score": 0.1122,
-                "ROC AUC": 0.5692,
-                "AUPRC": 0.0938
+                "Accuracy": 0.8134,
+                "Precision": 0.0963,
+                "Recall": 0.2388,
+                "F1 Score": 0.1372,
+                "ROC AUC": 0.5775,
+                "AUPRC": 0.1025
             },
             "batch_aware": {
-                "Accuracy": 0.7689,
-                "Precision": 0.0672,
-                "Recall": 0.2016,
-                "F1 Score": 0.1008,
-                "ROC AUC": 0.5405,
-                "AUPRC": 0.0857
+                "Accuracy": 0.807,
+                "Precision": 0.0909,
+                "Recall": 0.2338,
+                "F1 Score": 0.1309,
+                "ROC AUC": 0.569,
+                "AUPRC": 0.104
             }
         },
         "XGBoost": {
             "random": {
-                "Accuracy": 0.6828,
-                "Precision": 0.0695,
-                "Recall": 0.3178,
-                "F1 Score": 0.114,
-                "ROC AUC": 0.5547,
-                "AUPRC": 0.102
+                "Accuracy": 0.7977,
+                "Precision": 0.1008,
+                "Recall": 0.2848,
+                "F1 Score": 0.1489,
+                "ROC AUC": 0.5727,
+                "AUPRC": 0.1346
             },
             "batch_aware": {
-                "Accuracy": 0.631,
-                "Precision": 0.069,
-                "Recall": 0.3798,
-                "F1 Score": 0.1168,
-                "ROC AUC": 0.5118,
-                "AUPRC": 0.085
+                "Accuracy": 0.7957,
+                "Precision": 0.093,
+                "Recall": 0.2612,
+                "F1 Score": 0.1371,
+                "ROC AUC": 0.5651,
+                "AUPRC": 0.1288
             }
         }
     },
