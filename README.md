@@ -116,7 +116,31 @@ python -m pytest tests -q                                   # 54 offline tests
 | **Discovery** | undocumented-combination screen of your results |
 | **Validation** | benchmark results, the benchmark list itself, the permutation-null check |
 
-## 4. How far to trust it (read this)
+## 4. Put it online (Streamlit Community Cloud, free)
+
+Everything the app needs is in this repository (the results are committed under `data/`), so hosting takes five minutes.
+
+1. Sign in at <https://share.streamlit.io> with the GitHub account that owns this repository and click **Create app**.
+2. Pick this repository, branch `main`, main file `app.py`.
+3. Open **Advanced settings** and choose **Python 3.12** (RDKit and LangGraph install cleanly on it).
+4. Paste your keys into the **Secrets** box (never into the repository). The format is TOML, one `NAME = "value"` per line:
+
+   ```toml
+   OPENFDA_API_KEY = "your-openfda-key"
+   CONTACT_EMAIL = "you@example.com"
+   LLM_PROVIDER = "none"
+   ```
+
+   Streamlit exposes top-level secrets as environment variables, which is exactly what `pharmasense_ai/config.py` reads, so the names are the same as in `.env.example`. To use a language model, set `LLM_PROVIDER = "groq"` and add `GROQ_API_KEY = "..."` (or the Gemini / OpenRouter equivalent).
+5. Click **Deploy**. The first build takes a few minutes because of RDKit and LangGraph. You can edit the secrets later under the app's **Settings → Secrets**.
+
+**Before you share the link, read this.**
+* A public visitor's clicks (Mechanism explorer, Structure & analogues, Discovery) make live API calls with **your** keys. The openFDA key allows 120,000 requests/day, so that is rarely a problem. A language-model key on a free tier can run out quickly, so for a public app keep `LLM_PROVIDER = "none"`: every statement then comes from rules and cited evidence, and nothing is lost except optional wording.
+* To limit who can open it, use the app's **Settings → Sharing** and restrict viewing to specific email addresses.
+* The server's disk is temporary. The `.cache/` folder is rebuilt after a restart, so the first lookups after a restart are slower.
+* The sidebar page "ML models" shows the committed results. Re-training (`advanced_models.py`) is something you do on your own machine, then commit the refreshed files in `models/` and `data/processed/model_metrics.json`.
+
+## 5. How far to trust it (read this)
 * **Verified here** (offline): the maths (unit tests, formula self-check), the Möbius-inversion counting against brute force on synthetic
   data with *planted* interactions, the workflow logic and the app against hand-written fixtures, the refactor of the original statistics
   (results identical to 1e-10 on your shipped data), and the permutation null (0 false alarms in 20 shuffles of your data).
