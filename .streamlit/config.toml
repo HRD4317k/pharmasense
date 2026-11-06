@@ -1,0 +1,27 @@
+# PharmaSense theme + server defaults. Streamlit reads this automatically when you run `streamlit run app.py`
+# from this folder, locally and on Streamlit Community Cloud. Fine-tuning CSS lives in ui.py.
+[theme]
+base = "light"
+primaryColor = "#0E7C86"
+backgroundColor = "#F4F9FA"
+secondaryBackgroundColor = "#E3F3F2"
+textColor = "#12303A"
+font = "sans-serif"
+baseRadius = "0.75rem"
+borderColor = "#DCE8EA"
+
+[theme.sidebar]
+backgroundColor = "#12303A"
+secondaryBackgroundColor = "#1B4350"
+textColor = "#DCEBEE"
+primaryColor = "#5FD0C8"
+borderColor = "#27505B"
+
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false
+
+[server]
+headless = true

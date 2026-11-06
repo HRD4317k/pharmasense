@@ -11,6 +11,8 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+import ui
+
 ROOT = Path(__file__).resolve().parent
 RES = ROOT / "data" / "results"
 INK, TEAL, RISK, MUTE, AMBER, GREEN = "#12303A", "#0E7C86", "#C2185B", "#6B8791", "#E0A030", "#2E8B57"
@@ -213,6 +215,14 @@ def page_mechanism():
     rep = st.session_state.get("mech_report")
     if not rep:
         st.info("Enter drugs and press **Explain and challenge**. With no network access the page will say which sources were unreachable.")
+        st.subheader("How an explanation is built")
+        steps = [("1 · Profile", "Targets, enzyme roles and label warnings for each drug (ChEMBL, UniProt, openFDA labels).", ui.TEAL),
+                 ("2 · Overlaps", "Shared enzymes, shared proteins, pathways and safety axes between the drugs.", ui.TEAL),
+                 ("3 · Evidence", "Label interaction text, Europe PMC abstracts and FAERS counts, ranked by BM25.", ui.AMBER),
+                 ("4 · Score", "Bayesian log-odds per hypothesis, with correlated evidence discounted and a credible interval.", ui.AMBER),
+                 ("5 · Challenge", "Contradictions, gaps and rival explanations are shown next to every claim.", ui.RISK)]
+        for col, (t, b, c) in zip(st.columns(5), steps):
+            col.markdown(ui.card(t, b, accent=c), unsafe_allow_html=True)
         return
     _availability_banner(rep)
     st.markdown(f"### {' + '.join(rep['query']['drugs'])}" + (f" → {rep['query']['reaction'].lower()}" if rep["query"].get("reaction") else ""))

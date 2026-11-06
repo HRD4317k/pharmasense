@@ -16,6 +16,7 @@ import streamlit as st
 
 import exclusions
 import pharmasense_core as core
+import ui
 
 try:                                   # optional mechanism-engine pages (need langgraph / rdkit / networkx)
     import app_ai
@@ -24,7 +25,7 @@ except Exception as _e:                # noqa: BLE001 - the original app must ke
 
 ROOT = Path(__file__).resolve().parent
 RES = ROOT / "data" / "results"
-INK, TEAL, RISK, MUTE, AMBER = "#12303A", "#0E7C86", "#C2185B", "#6B8791", "#E0A030"
+INK, TEAL, RISK, MUTE, AMBER = ui.INK, ui.TEAL, ui.RISK, ui.MUTE, ui.AMBER
 
 VERDICTS = ["Combination effect", "Probable combination", "Pair effect", "Single-drug effect", "Cannot separate"]
 VCOLOR = {"Combination effect": RISK, "Probable combination": "#E58AA8", "Pair effect": AMBER,
@@ -37,19 +38,8 @@ VPLAIN = {
     "Cannot separate": "The drugs are almost always reported together, so this data cannot say which one is responsible.",
 }
 
-st.set_page_config(page_title="PharmaSense", page_icon="💊", layout="wide")
-st.markdown("""<style>
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
-html,body,[class*="css"],.stMarkdown{font-family:'IBM Plex Sans',sans-serif}
-h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif!important;color:#12303A;letter-spacing:-.02em}
-.block-container{max-width:1240px;padding-top:1.8rem}
-[data-testid=stSidebar]{background:#12303A}
-[data-testid=stSidebar] *{color:#DCEBEE!important}
-.hero{background:#12303A;color:#fff;border-radius:18px;padding:2rem 2.4rem;margin-bottom:1.2rem}
-.hero small{color:#8FB8C0;font-size:.95rem}
-.hero .big{font-family:'Bricolage Grotesque',sans-serif;font-size:2.2rem;font-weight:700;line-height:1.2;margin:.4rem 0}
-.badge{display:inline-block;padding:.15rem .7rem;border-radius:999px;color:#fff;font-weight:600;font-size:.85rem}
-</style>""", unsafe_allow_html=True)
+st.set_page_config(page_title="PharmaSense · drug-combination safety signals", page_icon="💊", layout="wide")
+ui.inject()                            # theme: ui.py (palette, CSS, hero/card helpers, chart style) + .streamlit/config.toml
 
 
 # ---------------------------------------------------------------- data
@@ -82,9 +72,7 @@ def badge(v):
 
 
 def style(fig, h=380):
-    fig.update_layout(height=h, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                      font=dict(family="IBM Plex Sans", color=INK), margin=dict(l=0, r=0, t=30, b=0))
-    return fig
+    return ui.style_fig(fig, h)
 
 
 def ladder(row):
@@ -129,10 +117,12 @@ def show_detail(row):
 
 # ---------------------------------------------------------------- pages
 def page_overview(D, T, M, X, meta):
-    st.markdown(f"""<div class="hero"><small>PharmaSense · FDA adverse-event reports (openFDA)</small>
-    <div class="big">{meta['n_reports']:,} reports · {meta['n_drugs']:,} drugs · {meta['n_reactions']:,} reactions</div>
-    <small>Reports received {meta.get('date_min','')[:6]} to {meta.get('date_max','')[:6]} ·
-    each report lists at least three drugs</small></div>""", unsafe_allow_html=True)
+    st.markdown(ui.hero(
+        "FDA adverse-event reports · openFDA",
+        f"{meta['n_reports']:,} reports · {meta['n_drugs']:,} drugs · {meta['n_reactions']:,} reactions",
+        f"Reports received {meta.get('date_min','')[:6]} to {meta.get('date_max','')[:6]} · each report lists at least three drugs",
+        ("Disproportionality: ROR · PRR · IC", "Exact tests + Benjamini-Hochberg", "Mechanism engine: LangGraph + RAG", "Bayesian evidence scoring")),
+        unsafe_allow_html=True)
     sig = T[T["verdict"] != "No signal"] if len(T) else T
     c = st.columns(4)
     c[0].metric("Reports analysed", f"{meta['n_reports']:,}")
@@ -161,7 +151,7 @@ def page_overview(D, T, M, X, meta):
         fig.add_vline(x=1, line_dash="dot", line_color=RISK, annotation_text="1 = no association")
         fig.update_xaxes(type="log", title="Reporting odds ratio, every combination tested")
         fig.update_yaxes(title="Combinations")
-        st.plotly_chart(style(fig, 330), width="stretch")
+        st.plotly_chart(style(fig, 330).update_layout(bargap=0.04), width="stretch")
         st.caption(f"Typical combination: {meta['median_ror_all_tested']:.1f}. "
                    f"Only {100 * meta['share_ror_over_10']:.1f}% exceed 10 and "
                    f"{100 * meta['share_ror_over_100']:.2f}% exceed 100 - those are rare, very specific combinations.")
@@ -172,8 +162,10 @@ def page_overview(D, T, M, X, meta):
                                    "Verdict": top["verdict"], "Reports with all three": top["n_reports"],
                                    "Odds ratio": top["ror"], "Lowest plausible ratio": top["ror_lcl"]}),
                      hide_index=True, width="stretch",
-                     column_config={"Odds ratio": st.column_config.NumberColumn(format="%.1f"),
-                                    "Lowest plausible ratio": st.column_config.NumberColumn(format="%.1f")})
+                     column_config={"Combination": st.column_config.TextColumn(width="large"),
+                                    "Reports with all three": st.column_config.NumberColumn("Reports (all 3)", width="small"),
+                                    "Odds ratio": st.column_config.NumberColumn(format="%.1f", width="small"),
+                                    "Lowest plausible ratio": st.column_config.NumberColumn("Lower 95%", format="%.1f", width="small")})
     else:
         st.info("No true combination effects were found in this data.")
     if meta.get("excluded_reaction_occurrences"):
@@ -505,30 +497,106 @@ All tests are exact and corrected for the number of partners tested. The stronge
 def page_ml():
     st.title("ML models")
     mp, fp = ROOT / "models" / "metrics.csv", ROOT / "models" / "feature_importance.csv"
+    jp = ROOT / "data" / "processed" / "model_metrics.json"
     if not mp.exists():
         st.info("No model results yet. Run `python run_pipeline.py --skip-fetch --full`, which trains the models and writes "
                 "models/metrics.csv.")
         return
     met = pd.read_csv(mp)
-    fig = px.bar(met.melt("model", var_name="metric"), x="model", y="value", color="metric", barmode="group",
-                 color_discrete_sequence=[TEAL, "#4E9AA3", RISK])
-    fig.update_layout(xaxis_title=None, yaxis_title=None)
-    st.plotly_chart(style(fig), width="stretch")
-    st.dataframe(met.round(3), hide_index=True, width="stretch")
+    info = json.loads(jp.read_text()) if jp.exists() else {}
+    target = str(info.get("Target", "the target reaction")).lower()
+    st.caption("A sanity probe, not a diagnostic tool: do the drugs on a report carry any information about its reaction?")
+
+    st.markdown(ui.callout(
+        f"<b>The question.</b> Take the 50 most-reported drugs. For each report, a model sees only <i>which of them are listed</i> "
+        f"and must guess whether the report mentions <b>{target}</b>. If drug combinations carry real information, the models beat "
+        f"chance; if not, they hover at an AUC of 0.5."), unsafe_allow_html=True)
+
+    if info.get("n_reports"):
+        c = st.columns(4)
+        c[0].metric("Reports used", f"{info['n_reports']:,}")
+        c[1].metric(f"Mention {target}", f"{info['n_positive']:,}", help="Reports where the target reaction appears.")
+        c[2].metric("Base rate", f"{100 * info['prevalence']:.1f}%", help="A model that guesses at random would 'find' this share. Compare AUPRC against it.")
+        c[3].metric("Distinct receive dates", f"{info.get('n_receive_dates', '?')}", help="Used to keep each reporting batch together when testing.")
+
+    st.subheader("What each model is doing")
+    k = st.columns(3)
+    k[0].markdown(ui.card("Lasso", "Gives every drug a plus or minus score and adds them up. A penalty switches off drugs that add nothing, "
+                          "so a short, readable list is left, with a direction: does this drug raise or lower the odds?",
+                          "Linear · readable · picks drugs", TEAL), unsafe_allow_html=True)
+    k[1].markdown(ui.card("Random forest", "100 decision trees each vote on the report. Trees can learn 'drug A matters only when drug B "
+                          "is also there', which a straight sum cannot.",
+                          "Trees · finds combinations", AMBER), unsafe_allow_html=True)
+    k[2].markdown(ui.card("XGBoost", "Trees built one after another, each correcting the mistakes of the ones before. Usually the strongest on "
+                          "large data; it also supplies the 'which drugs mattered' chart below.",
+                          "Boosting · strongest on big data", RISK), unsafe_allow_html=True)
+
+    st.subheader("How well do they do?")
+    has_rand = "auc_random" in met.columns
+    fig = go.Figure()
+    if has_rand:
+        fig.add_bar(name="Random split (optimistic)", x=met["model"], y=met["auc_random"], marker_color="#9FC9CE")
+    fig.add_bar(name="Whole report dates held out" if has_rand else "AUC", x=met["model"], y=met["auc"], marker_color=TEAL)
+    fig.add_hline(y=0.5, line_dash="dot", line_color=RISK)
+    fig.add_scatter(x=[None], y=[None], mode="lines", line=dict(color=RISK, dash="dot"), name="0.5 = guessing")
+    fig.update_layout(barmode="group", yaxis_title="ROC AUC (higher is better)", yaxis_range=[0, 1.0])
+    left, right = st.columns([3, 2])
+    left.plotly_chart(style(fig, 360), width="stretch")
+    prev = info.get("prevalence")
+    fig2 = go.Figure(go.Bar(x=met["model"], y=met["auprc"], marker_color=[TEAL, AMBER, RISK][:len(met)]))
+    if prev:
+        fig2.add_hline(y=prev, line_dash="dot", line_color=RISK)
+    fig2.update_layout(yaxis_title=f"AUPRC (dotted line = base rate {prev:.1%})" if prev else "AUPRC", yaxis_rangemode="tozero",
+                       title="Finding the reports that mention it")
+    right.plotly_chart(style(fig2, 360), width="stretch")
+
+    best = float(met["auc"].max())
+    gap = float((met["auc_random"] - met["auc"]).mean()) if has_rand else 0.0
+    if best < 0.62:
+        msg, kind = (f"<b>Close to chance.</b> The best model reaches an AUC of {best:.2f}. Knowing which common drugs are on a report "
+                     f"tells us very little about whether it mentions {target}. That is the expected, honest result for a common, "
+                     "non-specific symptom, and it is why PharmaSense leans on disproportionality statistics and mechanism "
+                     "evidence instead of a black-box predictor.", "warn")
+    elif best < 0.8:
+        msg, kind = (f"<b>A modest signal.</b> Best AUC {best:.2f}: the drug list helps a little, but far from decisively.", "")
+    else:
+        msg, kind = (f"<b>A strong score ({best:.2f}) - check it before believing it.</b> Strong scores in FAERS often come from one "
+                     "reporting batch, not from pharmacology.", "risk")
+    if gap > 0.03:
+        msg += (f" The random split scores about {gap:.2f} higher than the batch-aware test: part of an ordinary split's score is "
+                "near-duplicate reports from the same batch appearing on both sides.")
+    st.markdown(ui.callout(msg, kind), unsafe_allow_html=True)
+    with st.expander("Why two scores? (leakage)"):
+        st.write("FAERS reports arrive in batches - one study, one litigation, one manufacturer upload - and reports in a batch look "
+                 "alike. An ordinary random split puts some of them in training and some in testing, so the model is partly tested on "
+                 "copies of what it has already seen. The batch-aware test keeps every report received on the same date together, so "
+                 "the model is always tested on batches it has never seen. The target is also never a term PharmaSense itself discards "
+                 "as non-specific, and is skipped if most of its reports sit on one date.")
+
     if fp.exists():
         fi = pd.read_csv(fp).head(15).iloc[::-1]
-        st.plotly_chart(style(px.bar(fi, x="importance", y="feature", orientation="h", color_discrete_sequence=[TEAL],
-                                     title="Most important features (XGBoost)")), width="stretch")
+        if "lasso_coef" in fi.columns:
+            fi["Lasso says"] = np.where(fi["lasso_coef"] > 1e-9, "raises the odds",
+                                np.where(fi["lasso_coef"] < -1e-9, "lowers the odds", "dropped (no effect)"))
+            fig3 = px.bar(fi, x="importance", y="feature", orientation="h", color="Lasso says",
+                          color_discrete_map={"raises the odds": RISK, "lowers the odds": TEAL, "dropped (no effect)": "#C9D6DA"})
+        else:
+            fig3 = px.bar(fi, x="importance", y="feature", orientation="h", color_discrete_sequence=[TEAL])
+        fig3.update_layout(xaxis_title="Importance (XGBoost)", yaxis_title=None, legend=dict(y=-0.16, yanchor="top"))
+        st.subheader("Which drugs the models leaned on")
+        st.plotly_chart(style(fig3, 500).update_layout(legend=dict(orientation="h", y=-0.16, yanchor="top", x=0, title_text="")), width="stretch")
+        st.caption("Importance shows which drugs the model used, not that they cause the reaction. Colours come from the Lasso: the "
+                   "direction of each drug's effect once the other drugs are held fixed.")
+    st.caption("Try another reaction: `python src/analysis/advanced_models.py --target NAUSEA` (needs `python load_to_duckdb.py` first).")
 
 
 # ---------------------------------------------------------------- main
-st.sidebar.markdown("## 💊 PharmaSense")
-st.sidebar.caption("Drug and drug-combination safety signals from FDA adverse-event reports")
+st.sidebar.markdown(ui.brand(), unsafe_allow_html=True)
 AI_PAGES = list(app_ai.PAGES) if app_ai is not None else []
 page = st.sidebar.radio("Page", ["Overview", "Drug search", "Combination signals", "Glossary & formulas", "ML models"] + AI_PAGES,
                         label_visibility="collapsed")
-st.sidebar.caption("New to these terms? Open **Glossary & formulas**.")
-st.sidebar.caption("Research signals only. Association is not causation; not medical advice.")
+st.sidebar.markdown('<div class="ps-note"><b>New to these terms?</b> Open <i>Glossary &amp; formulas</i>.<br><br>'
+                    'Research signals only. Association is not causation; not medical advice.</div>', unsafe_allow_html=True)
 
 meta_file = RES / "meta.json"
 if page in AI_PAGES:

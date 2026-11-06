@@ -1,4 +1,4 @@
-model,auc,auprc,f1
-Lasso,0.9703,0.9684,0.8889
-Random Forest,0.9884,0.972,0.9032
-XGBoost,0.9688,0.9682,0.8889
+model,auc,auprc,f1,auc_random,auprc_random
+Lasso,0.6121,0.0932,0.1919,0.6248,0.1028
+Random Forest,0.5405,0.0857,0.1008,0.5692,0.0938
+XGBoost,0.5118,0.085,0.1168,0.5547,0.102

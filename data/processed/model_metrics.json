@@ -1,29 +1,65 @@
 {
-    "Target": "ILL-DEFINED DISORDER",
+    "Target": "FATIGUE",
+    "n_reports": 2008,
+    "n_positive": 129,
+    "prevalence": 0.0642,
+    "n_receive_dates": 15,
+    "folds": 5,
     "Models": {
         "Lasso": {
-            "Accuracy": 0.9826,
-            "Precision": 0.8235,
-            "Recall": 0.9655,
-            "F1 Score": 0.8889,
-            "ROC AUC": 0.9703,
-            "AUPRC": 0.9684
+            "random": {
+                "Accuracy": 0.758,
+                "Precision": 0.1178,
+                "Recall": 0.4264,
+                "F1 Score": 0.1846,
+                "ROC AUC": 0.6248,
+                "AUPRC": 0.1028
+            },
+            "batch_aware": {
+                "Accuracy": 0.7525,
+                "Precision": 0.1214,
+                "Recall": 0.4574,
+                "F1 Score": 0.1919,
+                "ROC AUC": 0.6121,
+                "AUPRC": 0.0932
+            }
         },
         "Random Forest": {
-            "Accuracy": 0.9851,
-            "Precision": 0.8485,
-            "Recall": 0.9655,
-            "F1 Score": 0.9032,
-            "ROC AUC": 0.9884,
-            "AUPRC": 0.972
+            "random": {
+                "Accuracy": 0.74,
+                "Precision": 0.0719,
+                "Recall": 0.2558,
+                "F1 Score": 0.1122,
+                "ROC AUC": 0.5692,
+                "AUPRC": 0.0938
+            },
+            "batch_aware": {
+                "Accuracy": 0.7689,
+                "Precision": 0.0672,
+                "Recall": 0.2016,
+                "F1 Score": 0.1008,
+                "ROC AUC": 0.5405,
+                "AUPRC": 0.0857
+            }
         },
         "XGBoost": {
-            "Accuracy": 0.9826,
-            "Precision": 0.8235,
-            "Recall": 0.9655,
-            "F1 Score": 0.8889,
-            "ROC AUC": 0.9688,
-            "AUPRC": 0.9682
+            "random": {
+                "Accuracy": 0.6828,
+                "Precision": 0.0695,
+                "Recall": 0.3178,
+                "F1 Score": 0.114,
+                "ROC AUC": 0.5547,
+                "AUPRC": 0.102
+            },
+            "batch_aware": {
+                "Accuracy": 0.631,
+                "Precision": 0.069,
+                "Recall": 0.3798,
+                "F1 Score": 0.1168,
+                "ROC AUC": 0.5118,
+                "AUPRC": 0.085
+            }
         }
-    }
+    },
+    "note": "batch-aware = whole receive dates held out together (GroupKFold); random = ordinary shuffled 5-fold. A large gap means near-duplicate reports from one batch are inflating the random-split score."
 }

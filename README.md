@@ -110,7 +110,7 @@ python -m pytest tests -q                                   # 54 offline tests
 |---|---|
 | Overview · Drug search · Combination signals | the original signal layer |
 | **Glossary & formulas** | definitions, every formula (new tab: the mechanism-engine mathematics) |
-| ML models | `advanced_models.py` results (after `--full`) |
+| ML models | `advanced_models.py` results (after `--full`): Lasso, Random Forest and XGBoost scored with a random split and a batch-aware split |
 | **Mechanism explorer** | Explain + Challenge for any 2–3 drugs, optional FAERS context (whole database or local), downloadable report |
 | **Structure & analogues** | structure, descriptors, look-alikes under four fingerprints, observed vs *inferred* reactions, activity-cliff flags |
 | **Discovery** | undocumented-combination screen of your results |
