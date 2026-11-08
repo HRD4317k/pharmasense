@@ -66,7 +66,7 @@ def _show_svg(svg_text, caption=None):
     if svg_text:
         st.markdown(f'<div style="background:#fff;border-radius:12px;border:1px solid #DDE8EA;padding:.3rem;text-align:center">{svg_text}</div>', unsafe_allow_html=True)
     else:
-        st.caption("Structure not available (no SMILES, or RDKit not installed).")
+        st.caption("Structure image not available (no SMILES, or the drawing library is missing on this server).")
     if caption:
         st.caption(caption)
 

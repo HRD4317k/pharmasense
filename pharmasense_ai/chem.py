@@ -10,7 +10,6 @@ from functools import lru_cache
 
 from rdkit import Chem, DataStructs, RDLogger
 from rdkit.Chem import Descriptors, Lipinski, rdFingerprintGenerator, rdMolDescriptors
-from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
 RDLogger.DisableLog("rdApp.*")
@@ -99,8 +98,15 @@ def shared_substructure_note(smiles_a: str, smiles_b: str) -> str:
 
 
 def svg(smiles: str, size=(320, 220)) -> str:
+    """2-D structure as SVG, or "" when it cannot be drawn. The drawing module is imported here, not at the top of the file:
+    on some servers it needs system libraries (libXrender) that are missing, and everything else in this module
+    (fingerprints, similarity, descriptors, scaffolds) works without it."""
     m = mol(smiles)
     if m is None:
+        return ""
+    try:
+        from rdkit.Chem.Draw import rdMolDraw2D
+    except ImportError:
         return ""
     d = rdMolDraw2D.MolDraw2DSVG(*size)
     d.drawOptions().clearBackground = False
