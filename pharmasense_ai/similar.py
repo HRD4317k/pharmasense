@@ -9,38 +9,78 @@ profiles are flagged as possible activity cliffs.
 from __future__ import annotations
 
 import json
+import threading
+from pathlib import Path
 
 import pandas as pd
 
 from . import chem
 from .config import Settings
-from .http import ApiError
 
 CLIFF_SIM, CLIFF_OVERLAP = 0.6, 0.2
 
 
-def build_library(names: list[str], svc, cache_name: str = "library.json") -> dict[str, str]:
-    """name -> SMILES via PubChem (cached on disk, so each drug is looked up once)."""
-    path = svc.settings.cache_dir / cache_name
-    lib = {}
+BUNDLED = Path(__file__).resolve().parents[1] / "data" / "reference" / "library_smiles.json"
+
+
+def bundled_library() -> dict[str, str]:
+    """Structures shipped with the repository, so the default comparison library needs no network at all."""
     try:
-        lib = json.loads(path.read_text())
+        return dict(json.loads(BUNDLED.read_text())["smiles"])
+    except Exception:
+        return {}
+
+
+def build_library_timed(names: list[str], svc, budget_s: float = 30.0, cache_name: str = "library.json"):
+    """name -> SMILES. Order of sources: bundled file, on-disk cache, then PubChem for the rest.
+
+    PubChem lookups run in a background thread and the caller waits at most `budget_s` seconds, so a slow or
+    unreachable PubChem can never hang the app. Lookups still running keep filling the cache for the next try.
+    Returns (library, pending): pending = names PubChem did not answer for (too slow or unreachable), as opposed to
+    names it answered "unknown" for, which are simply absent from the library."""
+    path = svc.settings.cache_dir / cache_name
+    lib = bundled_library()
+    try:
+        lib = {**json.loads(path.read_text()), **lib}
     except Exception:
         pass
-    for n in names:
-        if n in lib:
-            continue
-        try:
-            c = svc.pubchem.compound(n)
-        except ApiError:
-            c = None
-        lib[n] = (c or {}).get("connectivity_smiles") or (c or {}).get("smiles") or ""
+    todo = [n for n in names if n not in lib]
+    found: dict[str, str] = {}
+    base = dict(lib)
+    lock = threading.Lock()
+
+    def work():
+        for n in todo:
+            try:
+                c = svc.pubchem.compound(n)
+            except Exception:  # noqa: BLE001 - unreachable or failing: leave it pending, never cache it as "unknown"
+                continue
+            with lock:
+                found[n] = (c or {}).get("connectivity_smiles") or (c or {}).get("smiles") or ""
+                snapshot = {**base, **found}
+            _save(path, snapshot)
+
+    if todo:
+        t = threading.Thread(target=work, daemon=True)
+        t.start()
+        t.join(budget_s)
+    with lock:
+        lib.update(found)
+    pending = [n for n in todo if n not in found]
+    return {k: v for k, v in lib.items() if v}, pending
+
+
+def _save(path, lib):
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(lib))
     except Exception:
         pass
-    return {k: v for k, v in lib.items() if v}
+
+
+def build_library(names: list[str], svc, cache_name: str = "library.json", budget_s: float = 120.0) -> dict[str, str]:
+    """name -> SMILES (see build_library_timed)."""
+    return build_library_timed(names, svc, budget_s, cache_name)[0]
 
 
 def _signals(stats: pd.DataFrame, drug: str, top: int = 25) -> list[str]:

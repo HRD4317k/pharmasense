@@ -6,6 +6,7 @@ differ sharply in activity ("activity cliffs") - similarity proposes hypotheses,
 """
 from __future__ import annotations
 
+import json
 from functools import lru_cache
 
 from rdkit import Chem, DataStructs, RDLogger
@@ -95,6 +96,48 @@ def shared_substructure_note(smiles_a: str, smiles_b: str) -> str:
     if sa and sa == sb:
         return f"Same core scaffold ({sa})."
     return ""
+
+
+_SVG_WORKER = r"""
+import json, sys
+items = json.loads(sys.stdin.read())
+out = []
+try:
+    from rdkit import Chem, RDLogger
+    from rdkit.Chem.Draw import rdMolDraw2D
+    RDLogger.DisableLog("rdApp.*")
+except Exception:
+    print(json.dumps([""] * len(items))); sys.exit(0)
+for smi, w, h in items:
+    try:
+        m = Chem.MolFromSmiles(smi)
+        if m is None:
+            out.append(""); continue
+        d = rdMolDraw2D.MolDraw2DSVG(int(w), int(h))
+        d.drawOptions().clearBackground = False
+        d.DrawMolecule(m); d.FinishDrawing()
+        out.append(d.GetDrawingText())
+    except Exception:
+        out.append("")
+print(json.dumps(out))
+"""
+
+
+def svgs_isolated(items: list[tuple[str, int, int]], timeout: float = 40.0) -> list[str]:
+    """Draw many structures in ONE separate Python process. RDKit's drawing code is native and needs system graphics
+    libraries; if it crashes or hangs on a server, only the child process dies and the app shows "image not available"
+    instead of restarting. items: [(smiles, width, height)]. Returns one SVG string (or "") per item."""
+    import subprocess
+    import sys
+    if not items:
+        return []
+    try:
+        r = subprocess.run([sys.executable, "-c", _SVG_WORKER], input=json.dumps([list(i) for i in items]),
+                           capture_output=True, text=True, timeout=timeout)
+        res = json.loads(r.stdout.strip().splitlines()[-1]) if r.returncode == 0 and r.stdout.strip() else []
+    except Exception:  # noqa: BLE001 - timeout, crash or bad output: no pictures, but no crash either
+        res = []
+    return res if len(res) == len(items) else [""] * len(items)
 
 
 def svg(smiles: str, size=(320, 220)) -> str:

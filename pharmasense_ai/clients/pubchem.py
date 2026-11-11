@@ -36,15 +36,19 @@ class PubChem:
 
     def compound(self, name: str) -> dict | None:
         """Best match for a drug name (generic or brand) or None if PubChem does not know it."""
+        errors = []
         for smi in SMILES_SETS:
             url = f"{BASE}/compound/name/{quote(name, safe='')}/property/{smi},{PROPS}/JSON"
             try:
                 data = self.http.get_json(url)
-            except ApiError:
+            except ApiError as e:
+                errors.append(e)
                 continue                       # maybe an unknown property name: try the other spelling
             if data is None:
                 return None                    # 404: PubChem has no such compound
             rows = (data.get("PropertyTable") or {}).get("Properties") or []
             if rows:
                 return normalize(rows[0])
+        if len(errors) == len(SMILES_SETS):
+            raise errors[-1]                   # every attempt failed: unreachable, which is not the same as "unknown"
         return None

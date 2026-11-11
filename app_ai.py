@@ -64,6 +64,7 @@ def _svg(smiles, size=(300, 210)):
 
 def _show_svg(svg_text, caption=None):
     if svg_text:
+        svg_text = svg_text.replace("<svg ", '<svg style="width:100%;height:auto;max-width:360px" ', 1)   # scale to the column
         st.markdown(f'<div style="background:#fff;border-radius:12px;border:1px solid #DDE8EA;padding:.3rem;text-align:center">{svg_text}</div>', unsafe_allow_html=True)
     else:
         st.caption("Structure image not available (no SMILES, or the drawing library is missing on this server).")
@@ -145,12 +146,18 @@ def render_challenge(rep):
 
 def render_drugs(rep):
     names = list(rep["drugs"])
+    key = "|".join(f"{n}:{rep['drugs'][n].get('smiles') or ''}" for n in names)
+    if st.session_state.get("_drug_svgs_key") != key:            # draw once per report, in a separate process
+        from pharmasense_ai import chem
+        st.session_state["_drug_svgs"] = chem.svgs_isolated([(rep["drugs"][n].get("smiles") or "", 300, 210) for n in names])
+        st.session_state["_drug_svgs_key"] = key
+    pics = st.session_state["_drug_svgs"]
     cols = st.columns(len(names))
-    for c, n in zip(cols, names):
+    for c, n, pic in zip(cols, names, pics):
         d = rep["drugs"][n]
         with c, st.container(border=True):
             st.markdown(f"**{n}**")
-            _show_svg(_svg(d["smiles"]) if d["smiles"] else None)
+            _show_svg(pic or None)
             s = d.get("structure") or {}
             if s:
                 st.caption(" · ".join(f"{k} {v}" for k, v in s.items() if v not in (None, "") and k in ("formula", "mw", "logp", "tpsa", "hbd", "hba", "molecular_weight", "molecular_formula"))[:200] or "")
@@ -259,7 +266,7 @@ def page_mechanism():
 
 
 # ------------------------------------------------------------------------------------------------ page 2
-LIBRARY_DEFAULT = ["ibuprofen", "naproxen", "ketoprofen", "diclofenac", "celecoxib", "aspirin", "paracetamol", "warfarin", "simvastatin", "atorvastatin",
+LIBRARY_DEFAULT = ["ibuprofen", "naproxen", "ketoprofen", "flurbiprofen", "diclofenac", "celecoxib", "aspirin", "paracetamol", "warfarin", "simvastatin", "atorvastatin",
                    "pravastatin", "rosuvastatin", "fluoxetine", "sertraline", "paroxetine", "citalopram", "amiodarone", "fluconazole"]
 
 
@@ -270,6 +277,7 @@ def page_structure():
         c1, c2 = st.columns([2, 3])
         drug = c1.text_input("Drug", value="ibuprofen")
         lib_txt = c2.text_input("Compare against (comma-separated; PubChem structures are fetched once, then cached)", value=", ".join(LIBRARY_DEFAULT))
+        use_chembl = st.checkbox("Also search all of ChEMBL for similar molecules (slower, needs internet)", value=False)
         go = st.form_submit_button("Find look-alikes", type="primary")
     if not go and "struct_rep" not in st.session_state:
         return
@@ -279,18 +287,28 @@ def page_structure():
             svc = services()
             names = sorted({n.strip().lower() for n in lib_txt.split(",") if n.strip()} | {drug.strip().lower()})
             with st.spinner("Looking up structures …"):
-                lib = similar.build_library(names, svc)
+                lib, pending = similar.build_library_timed(names, svc, budget_s=30.0)
             smi = lib.get(drug.strip().lower())
             if not smi:
-                st.error(f"No structure found for '{drug}'. PubChem may be unreachable, or the name is not recognised.")
+                why = ("PubChem did not answer (slow or unreachable). Try again in a minute; finished lookups are cached."
+                       if drug.strip().lower() in pending else "PubChem does not recognise this name; try the generic name.")
+                st.error(f"No structure found for '{drug}'. {why}")
                 return
             stats = pd.read_parquet(RES / "drug_reaction_stats.parquet") if (RES / "drug_reaction_stats.parquet").exists() else None
             rep = similar.analog_report(drug.strip(), smi, lib, stats)
             rep["_smiles"] = smi
-            try:
-                rep["chembl_similar"] = svc.chembl.similar(smi, 70, 10)
-            except Exception:  # noqa: BLE001
-                rep["chembl_similar"] = []
+            rep["_pending"] = pending
+            rep["chembl_similar"] = []
+            if use_chembl:
+                with st.spinner("Searching ChEMBL …"):
+                    try:
+                        rep["chembl_similar"] = svc.chembl.similar(smi, 70, 10)
+                    except Exception:  # noqa: BLE001
+                        rep["chembl_similar"] = []
+            with st.spinner("Drawing structures …"):
+                from pharmasense_ai import chem
+                pics = chem.svgs_isolated([(smi, 340, 240)] + [(a["smiles"], 220, 160) for a in rep["analogues"]])
+            rep["_svg_main"], rep["_svg_analogues"] = pics[0], pics[1:]
             st.session_state["struct_rep"] = rep
         except Exception as e:  # noqa: BLE001
             st.error(f"Failed: {type(e).__name__}: {e}")
@@ -298,7 +316,7 @@ def page_structure():
     rep = st.session_state["struct_rep"]
     c1, c2 = st.columns([1, 2])
     with c1:
-        _show_svg(_svg(rep["_smiles"], (340, 240)), rep["drug"].title())
+        _show_svg(rep.get("_svg_main") or None, rep["drug"].title())
     with c2:
         d = rep["descriptors"]
         if d:
@@ -311,11 +329,14 @@ def page_structure():
     st.markdown("#### Structural look-alikes")
     if not rep["analogues"]:
         st.info("No library molecule passed the similarity cut-off.")
-    for a in rep["analogues"]:
+    if rep.get("_pending"):
+        st.caption("Not looked up in time (PubChem slow): " + ", ".join(rep["_pending"]) + ". Press the button again to include them.")
+    pics = rep.get("_svg_analogues") or [""] * len(rep["analogues"])
+    for a, pic in zip(rep["analogues"], pics):
         with st.container(border=True):
             c1, c2, c3 = st.columns([1, 2, 2])
             with c1:
-                _show_svg(_svg(a["smiles"], (220, 160)))
+                _show_svg(pic or None)
             with c2:
                 st.markdown(f"**{a['drug'].title()}** · mean Tanimoto **{a['similarity']:.2f}**")
                 st.caption(" · ".join(f"{k} {v:.2f}" for k, v in a["by_fingerprint"].items()))
