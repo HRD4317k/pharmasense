@@ -2,147 +2,147 @@
  "null": [
   {
    "perm": 0,
-   "tested": 98,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 1,
-   "tested": 29,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 2,
-   "tested": 34,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 3,
-   "tested": 78,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 4,
-   "tested": 33,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 5,
-   "tested": 84,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 6,
-   "tested": 53,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 7,
-   "tested": 67,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 8,
-   "tested": 69,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 9,
-   "tested": 75,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 10,
-   "tested": 109,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 11,
-   "tested": 74,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 12,
-   "tested": 74,
-   "signals": 0,
-   "combination_effects": 0,
-   "probable_or_combination": 0
-  },
-  {
-   "perm": 13,
    "tested": 82,
    "signals": 0,
    "combination_effects": 0,
    "probable_or_combination": 0
   },
   {
+   "perm": 1,
+   "tested": 24,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 2,
+   "tested": 29,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 3,
+   "tested": 62,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 4,
+   "tested": 27,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 5,
+   "tested": 76,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 6,
+   "tested": 49,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 7,
+   "tested": 64,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 8,
+   "tested": 66,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 9,
+   "tested": 63,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 10,
+   "tested": 87,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 11,
+   "tested": 69,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 12,
+   "tested": 68,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
+   "perm": 13,
+   "tested": 72,
+   "signals": 0,
+   "combination_effects": 0,
+   "probable_or_combination": 0
+  },
+  {
    "perm": 14,
-   "tested": 35,
+   "tested": 28,
    "signals": 0,
    "combination_effects": 0,
    "probable_or_combination": 0
   },
   {
    "perm": 15,
-   "tested": 46,
+   "tested": 37,
    "signals": 0,
    "combination_effects": 0,
    "probable_or_combination": 0
   },
   {
    "perm": 16,
-   "tested": 77,
+   "tested": 62,
    "signals": 0,
    "combination_effects": 0,
    "probable_or_combination": 0
   },
   {
    "perm": 17,
-   "tested": 78,
+   "tested": 75,
    "signals": 0,
    "combination_effects": 0,
    "probable_or_combination": 0
   },
   {
    "perm": 18,
-   "tested": 67,
+   "tested": 53,
    "signals": 0,
    "combination_effects": 0,
    "probable_or_combination": 0
   },
   {
    "perm": 19,
-   "tested": 48,
+   "tested": 40,
    "signals": 0,
    "combination_effects": 0,
    "probable_or_combination": 0
   }
  ],
- "observed_signals": 81,
- "observed_combination_like": 8,
+ "observed_signals": 52,
+ "observed_combination_like": 7,
  "null_mean_signals": 0.0,
  "null_mean_combination_like": 0.0,
  "empirical_fdr_signals": 0.0,
